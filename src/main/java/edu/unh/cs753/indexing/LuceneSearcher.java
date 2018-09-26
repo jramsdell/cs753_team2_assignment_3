@@ -180,6 +180,63 @@ public class LuceneSearcher {
         return null;
     }
 
+    public SimilarityBase createBnnSimilarity() {
+        return new SimilarityBase() {
+            @Override
+            protected float score(BasicStats basicStats, float freq, float docLen) {
+
+                if (docLen == 0) {
+                    return 0;
+                }
+                else {
+                    return 1;
+                }
+            }
+
+            @Override
+            public String toString() {
+                return null;
+            }
+        };
+
+    }
+
+    public SimilarityBase createLncSimilarity() {
+        return new SimilarityBase() {
+            @Override
+            protected float score(BasicStats basicStats, float freq, float docLen) {
+
+                double ans = (Math.log(1 + freq) / Math.sqrt(docLen)) * 1 * (1/Math.sqrt(docLen));
+                return (float)ans;
+            }
+
+            @Override
+            public String toString() {
+                return null;
+            }
+
+        };
+
+    }
+
+    public SimilarityBase createAncSimilarity() {
+        return new SimilarityBase() {
+            @Override
+            protected float score(BasicStats basicStats, float freq, float docLen) {
+
+                double ans = 1 * 1/Math.sqrt(docLen);
+                return (float)ans;
+            }
+
+            @Override
+            public String toString() {
+                return null;
+            }
+
+        };
+
+    }
+
     public static void main (String [] args) throws IOException {
         LuceneSearcher searcher1 = new LuceneSearcher("/home/rachel/ir/P1/paragraphs", "/home/rachel/ir/test200/test200-train/train.pages.cbor-outlines.cbor");
         searcher1.run();
