@@ -36,6 +36,38 @@ public class EvaluationUtils {
         return m;
     }
 
+    public static HashMap<String, HashMap<String, Float>> ParseRunFile(File f) throws IOException {
+        HashMap<String, HashMap<String, Float>> m = new HashMap<>();
+
+        FileReader fstream = new FileReader(f);
+        BufferedReader in = new BufferedReader(fstream);
+
+        String line = in.readLine();
+        while (line != null) {
+            String[] elements = line.split(" ");
+            String query = elements[0];
+            String id = elements[1];
+            Float rank = Float.parseFloat(elements[2]);
+
+            if (!m.containsKey(query)) {
+                m.put(query, new HashMap<>());
+            }
+            m.get(query).put(id, rank);
+
+            line = in.readLine();
+        }
+        in.close();
+        return m;
+    }
+
+    public static void parseAll(String dirPath) throws IOException {
+        File dir = new File(dirPath);
+        File[] dirList = dir.listFiles();
+        for (File f : dirList) {
+            ParseRunFile(f);
+        }
+    }
+
     // Make a map of lists to get the list of PIDs
     public static HashMap<String, ArrayList<String>> ParseResults(String path) throws IOException {
         // Initialie hashmap
@@ -146,49 +178,39 @@ public class EvaluationUtils {
         return totalMap / numberOfQueries;
     }
 
-public static double calculateSpearman(List<Integer> rankings1 , List<Integer> rankings2){
+    public static double calculateSpearman(List<Integer> rankings1 , List<Integer> rankings2) {
 
         double diff,ele1,ele2,sum=0.0;
-
         double summation;
 
-                for(int i=0; i<rankings1.size();i++){
+        for(int i=0; i<rankings1.size();i++){
 
-                    ele1=rankings1.get(i);
-                    ele2=rankings2.get(i);
-                    diff=ele1-ele2;
+            ele1=rankings1.get(i);
+            ele2=rankings2.get(i);
+            diff=ele1-ele2;
 
-                    sum+=Math.pow(diff, 2.0);
+            sum+=Math.pow(diff, 2.0);
+        }
 
-
-                }
-
-                return  summation= 6*sum/(rankings1.size() * (Math.pow(rankings1.size(),2))-1);
-
-
-
-
-
-
-}
+        return  summation= 6*sum/(rankings1.size() * (Math.pow(rankings1.size(),2))-1);
+    }
 
     public static void main(String [] args) throws IOException {
 
-        String qrels = "/home/hcgs/data_science/data/test200/test200-train/train.pages.cbor-article.qrels";
-        HashMap<String, HashMap<String, Integer>> relevant = EvaluationUtils.GetRelevantQueries(qrels);
+            /*String qrels = "/home/hcgs/data_science/data/test200/test200-train/train.pages.cbor-article.qrels";
+            HashMap<String, HashMap<String, Integer>> relevant = EvaluationUtils.GetRelevantQueries(qrels);
 
-        String res1 = "/home/hcgs/Desktop/projects/cs753_team2_assignment2/results1.txt";
-//        String res2 = "/Users/abhinav/desktop/results2.txt";
+            String res1 = "/home/hcgs/Desktop/projects/cs753_team2_assignment2/results1.txt";
+    //      String res2 = "/Users/abhinav/desktop/results2.txt";
 
-        HashMap<String, ArrayList<String>> metrics1 = EvaluationUtils.ParseResults(res1);
-//        HashMap<String, ArrayList<String>> metrics2 = EvaluationUtils.ParseResults(res2);
+            HashMap<String, ArrayList<String>> metrics1 = EvaluationUtils.ParseResults(res1);
+    //      HashMap<String, ArrayList<String>> metrics2 = EvaluationUtils.ParseResults(res2);
 
-        double nmap1 = KotlinEvaluationUtils.INSTANCE.getNDCG(relevant, metrics1);
-//        double nmap2 = getMap(relevant, metrics2);
+            double nmap1 = KotlinEvaluationUtils.INSTANCE.getNDCG(relevant, metrics1);
+    //      double nmap2 = getMap(relevant, metrics2);
 
-        System.out.println("Map is " + nmap1);
-//        System.out.println("Map is " + nmap2);
+            System.out.println("Map is " + nmap1);
+    //      System.out.println("Map is " + nmap2);*/
+
     }
-
-
 }
