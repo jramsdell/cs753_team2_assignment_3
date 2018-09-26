@@ -186,10 +186,10 @@ public class LuceneSearcher {
             protected float score(BasicStats basicStats, float freq, float docLen) {
 
                 if (docLen == 0) {
-                    return 0;
+                    return 0 * basicStats.getBoost();
                 }
                 else {
-                    return 1;
+                    return 1 * basicStats.getBoost();
                 }
             }
 
@@ -207,7 +207,7 @@ public class LuceneSearcher {
             protected float score(BasicStats basicStats, float freq, float docLen) {
 
                 double ans = (Math.log(1 + freq) / Math.sqrt(docLen)) * 1 * (1/Math.sqrt(docLen));
-                return (float)ans;
+                return (float)ans * basicStats.getBoost();
             }
 
             @Override
@@ -225,7 +225,7 @@ public class LuceneSearcher {
             protected float score(BasicStats basicStats, float freq, float docLen) {
 
                 double ans = 1 * 1/Math.sqrt(docLen);
-                return (float)ans;
+                return (float)ans * basicStats.getBoost();
             }
 
             @Override
