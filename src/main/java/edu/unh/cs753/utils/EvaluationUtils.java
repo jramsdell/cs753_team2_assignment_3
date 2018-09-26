@@ -146,7 +146,31 @@ public class EvaluationUtils {
         return totalMap / numberOfQueries;
     }
 
+public static double calculateSpearman(List<Integer> rankings1 , List<Integer> rankings2){
 
+        double diff,ele1,ele2,sum=0.0;
+
+        double summation;
+
+                for(int i=0; i<rankings1.size();i++){
+
+                    ele1=rankings1.get(i);
+                    ele2=rankings2.get(i);
+                    diff=ele1-ele2;
+
+                    sum+=Math.pow(diff, 2.0);
+
+
+                }
+
+                return  summation= 6*sum/(rankings1.size() * (Math.pow(rankings1.size(),2))-1);
+
+
+
+
+
+
+}
 
     public static void main(String [] args) throws IOException {
 
