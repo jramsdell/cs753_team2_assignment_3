@@ -102,13 +102,6 @@ public class LuceneSearcher {
         };
         searcher.setSimilarity(mysimilarity);
 
-//        TopDocs topDocs= query(qinput,10);
-//        for (ScoreDoc sd : topDocs.scoreDocs) {
-//            Document doc = searcher.doc(sd.doc);
-//            String id = doc.get("id");
-//            String text = doc.get("text");
-//            System.out.println("id: " + id + "\ntext: " + text);
-//        }
     }
 
     /**

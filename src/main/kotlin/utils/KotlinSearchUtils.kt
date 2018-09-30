@@ -4,6 +4,7 @@ import edu.unh.cs753.indexing.LuceneSearcher
 import edu.unh.cs753.utils.IndexUtils
 import edu.unh.cs753.utils.SearchUtils
 import org.apache.lucene.search.Query
+import org.apache.lucene.search.similarities.BM25Similarity
 import java.io.File
 
 private data class DocumentRanking(
@@ -26,21 +27,21 @@ object KotlinSearchUtils {
             .run {  writeResults("section_standard", "standard", this) }
 
         // Write lnc.ltn page-level and section-level results
-        searcher.createLncSimilarity()
+        searcher.searcher.setSimilarity(searcher.createLncSimilarity())
         doPageQueries(searcher) { text: String -> KotlinEvaluationUtils.queryLTN(text, searcher.searcher) }
             .run { writeResults("page_lnc_ltn", "lnc.ltn", this) }
         doSectionQueries(searcher) { text: String -> KotlinEvaluationUtils.queryLTN(text, searcher.searcher) }
             .run { writeResults("section_lnc_ltn", "lnc.ltn", this) }
 
         // Write bnn.bnn page-level and section-level results
-        searcher.createBnnSimilarity()
+        searcher.searcher.setSimilarity(searcher.createBnnSimilarity())
         doPageQueries(searcher) { text: String -> KotlinEvaluationUtils.queryBNN(text, searcher.searcher) }
             .run { writeResults("page_bnn_bnn", "bnn.bnn", this) }
         doSectionQueries(searcher) { text: String -> KotlinEvaluationUtils.queryBNN(text, searcher.searcher) }
             .run { writeResults("section_bnn_bnn", "bnn.bnn", this) }
 
         // Write anc.apc page-level and section-level results
-        searcher.createAncSimilarity()
+        searcher.searcher.setSimilarity(searcher.createAncSimilarity())
         doPageQueries(searcher) { text: String -> KotlinEvaluationUtils.queryAPC(text, searcher.searcher) }
             .run { writeResults("page_anc_apc", "anc.apc", this) }
         doSectionQueries(searcher) { text: String -> KotlinEvaluationUtils.queryAPC(text, searcher.searcher) }
@@ -60,12 +61,12 @@ object KotlinSearchUtils {
             searcher.pages
                 .flatMap { page ->
                     val sections = page.flatSectionPaths()
-                        .flatten()
+                        .map { page.pageName + " " + it.map { it.heading }.joinToString(" ") to
+                                page.pageId + "/" + it.map { it.headingId }.joinToString("/") } +
+                            (page.pageName to page.pageId)
 
-                    val queries = sections.map { section ->
-                        section.heading to section.headingId } + (page.pageName to page.pageId)
 
-                    val runResults = queries.map { (queryName, queryId) ->
+                    val runResults = sections.map { (queryName, queryId) ->
                         val results = searcher.doSearch(queryCreator(queryName))
                         getRankings(queryId, results)
                     }
@@ -74,9 +75,11 @@ object KotlinSearchUtils {
 
     private fun getRankings(id: String, results: List<LuceneSearcher.idScore>) =
             results
-                .sortedByDescending { it.s }
+                .groupBy { it.i }
+                .map { it.key to it.value.maxBy { it.s }!!.s.toDouble() }
+                .sortedByDescending { (_, score) -> score }
                 .mapIndexed { index, idScore ->
-                    DocumentRanking(id = idScore.i, score = idScore.s.toDouble(), rank = index + 1) }
+                    DocumentRanking(id = idScore.first, score = idScore.second, rank = index + 1) }
                 .let { rankings -> id to rankings }
 
 
@@ -89,7 +92,7 @@ object KotlinSearchUtils {
 
         results.forEach { (query, rankings) ->
             rankings
-                .map { (id, score, rank) -> "$query Q0 $id $rank $score" }
+                .map { (id, score, rank) -> "$query Q0 $id $rank $score $methodName" }
                 .joinToString("\n")
                 .let { rankingsString -> out.write(rankingsString + "\n") }
         }

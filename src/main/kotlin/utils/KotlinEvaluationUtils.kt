@@ -1,5 +1,6 @@
 package utils
 
+import edu.unh.cs753.utils.EvaluationUtils
 import edu.unh.cs753.utils.SearchUtils
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.index.Term
@@ -114,4 +115,9 @@ object KotlinEvaluationUtils {
             .build()
     }
 
+
+//    fun spearman() {
+//        EvaluationUtils.
+//
+//    }
 }
