@@ -1,6 +1,7 @@
 package utils
 
 import edu.unh.cs753.indexing.LuceneSearcher
+import edu.unh.cs753.utils.IndexUtils
 import edu.unh.cs753.utils.SearchUtils
 import org.apache.lucene.search.Query
 import java.io.File
@@ -95,5 +96,9 @@ object KotlinSearchUtils {
 
         out.close()
     }
+
+    fun getPages(cborLoc: String) =
+            IndexUtils.createPageIterator(cborLoc)
+                .toList()
 
 }

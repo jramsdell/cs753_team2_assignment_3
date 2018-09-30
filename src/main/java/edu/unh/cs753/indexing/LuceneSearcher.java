@@ -10,20 +10,24 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.BasicStats;
 import org.apache.lucene.search.similarities.SimilarityBase;
+import utils.KotlinSearchUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class LuceneSearcher {
     public final IndexSearcher searcher;
-    public final Iterable<Data.Page> pages;
+    public final List<Data.Page> pages;
 
     public LuceneSearcher(String indexLoc, String queryCborLoc) {
         searcher = SearchUtils.createIndexSearcher(indexLoc);
-        pages = IndexUtils.createPageIterator(queryCborLoc);
+
+        // Returning a list now instead of an iterable... because we end up using this more than once!
+        pages = KotlinSearchUtils.INSTANCE.getPages(queryCborLoc);
     }
 
     /**

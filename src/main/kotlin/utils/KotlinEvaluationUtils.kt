@@ -60,10 +60,15 @@ object KotlinEvaluationUtils {
 
     fun queryLTN(text: String, searcher: IndexSearcher) =
             SearchUtils.createTokenList(text, StandardAnalyzer())
+                // |-> Get token frequencies
                 .groupingBy { it }
                 .eachCount()
+
+                // |-> Apply tf-idf
                 .map { (term, freq) ->
                     term to (1.0 + Math.log10(freq.toDouble())) * getInverseTermFreq(searcher, term)  }
+
+                // |-> Use final weights to create boosted queries
                 .map { (term, tfidf) ->
                     BoostQuery(TermQuery(Term("text", term)), tfidf.toFloat()) }
                 .fold(BooleanQuery.Builder()) { builder, boostedQuery ->
@@ -86,10 +91,22 @@ object KotlinEvaluationUtils {
 
         val maxFreq = termFreqs.values.max() ?: 1
         return termFreqs
+
+            // |-> Apply Augment Frequency to terms
             .map { (term, freq) ->
                 term to (0.5 + (0.5 * freq) / maxFreq.toDouble()) }
+
+            // |->  Then multiply by probabilistic IDF for these terms
             .map { (term, augFreq) ->
                 term to augFreq * getProbIDF(searcher, term) }
+
+            // |-> Then normalize using cosine
+            .let { results: List<Pair<String, Double>> ->
+                val cosineNorm = 1.0 /
+                        results.sumByDouble { (_, freq) -> freq.pow(2.0) }.pow(0.5)
+                results.map { (term, freq) -> term to freq * cosineNorm }}
+
+            // |-> Turn final term weights into boosted queries
             .map { (term, augProbIdf) ->
                 BoostQuery(TermQuery(Term("text", term)), augProbIdf.toFloat()) }
             .fold(BooleanQuery.Builder()) { builder, termQuery ->
