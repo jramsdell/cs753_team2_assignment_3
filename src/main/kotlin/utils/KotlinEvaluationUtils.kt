@@ -124,23 +124,67 @@ object KotlinEvaluationUtils {
 //
 //    }
 
-    public fun getRuns(resultsLoc: String) =
+
+    fun getSpearmanResults(resultLoc: String) {
+        val runs = getRuns(resultLoc)
+            .groupBy { it.first.split("_").first()  }
+            .forEach { (pageOrSection, results) ->
+                val standardRun = results.first { "standard" in it.first }.second
+                val otherRuns = results.filter { "standard" !in it.first }
+                doSpearman(otherRuns, standardRun, "wee")
+            }
+
+    }
+
+    private fun getRuns(resultsLoc: String) =
         File(resultsLoc)
             .listFiles()
             .map { run ->
                 run.nameWithoutExtension to EvaluationUtils.parseRunFile(run) }
 
 
-    fun doSpearman(runsToCompare: runRankings, bm25Run: runRankings, queryType: String) {
-
+    private fun doSpearman(runsToCompare: runRankings, bm25Run: queryRankings, queryType: String) {
+        runsToCompare.forEach { (run, rankings) ->
+            val correlation = compareToBm25(bm25Run, rankings)
+            println("$run & $correlation")
+        }
     }
 
-    private fun compareToBm25(bm25: queryRankings, run: queryRankings) {
 
+    private fun compareToBm25(bm25: queryRankings, run: queryRankings) =
+            bm25
+                .filter { (_, rankings) -> rankings.isNotEmpty() }
+                .mapNotNull { (query, rankings) ->
+                    val runRanks = run[query] ?: HashMap()
+                    val cor = generateSpearmanForQuery(rankings, runRanks)
+                    if (! cor.isFinite()) null else cor }
+                .average()
+
+
+    private fun generateSpearmanForQuery(bm25Rankings: HashMap<String, Int>, runRanks: HashMap<String, Int>): Double {
+        val bm25RankingsToCompare: ArrayList<Int> = ArrayList()
+        val runRankingsToCompare: ArrayList<Int> = ArrayList()
+
+        bm25Rankings.forEach { (pid, paragraphRank) ->
+            val runParagraphRank = runRanks[pid]
+            if (runParagraphRank != null) {
+                bm25RankingsToCompare.add(paragraphRank)
+                runRankingsToCompare.add(runParagraphRank)
+            } else {
+                bm25RankingsToCompare.add(-1)
+                runRankingsToCompare.add(-1)
+            }
+        }
+        val maxDiff = bm25RankingsToCompare.zip(runRankingsToCompare)
+            .map { (v1, v2) -> (v1 - v2).toDouble().pow(2.0) }
+            .max()!!
+
+        return EvaluationUtils.calculateSpearman(bm25RankingsToCompare, runRankingsToCompare, maxDiff)
+//        return 0.0
     }
 
 }
 
 fun main(args: Array<String>) {
-    KotlinEvaluationUtils.getRuns("/home/hcgs/Desktop/projects/assignments/cs753_team2_assignment_3/results")
+    KotlinEvaluationUtils.getSpearmanResults("/home/hcgs/Desktop/projects/assignments/cs753_team2_assignment_3/results")
 }
