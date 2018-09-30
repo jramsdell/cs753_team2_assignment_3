@@ -48,71 +48,19 @@ public class LuceneSearcher {
         return null;
     }
 
-    public void run() throws IOException {
-        FileWriter fstream = new FileWriter("standard_bm25.run", false);
-        BufferedWriter out = new BufferedWriter(fstream);
-
-        for (Data.Page page : pages) {
-
-            // Id of the page, which is needed when you print out the run file
-            String pageId = page.getPageId();
-
-            // This query is the name of the page
-            String query = page.getPageName();
-            ArrayList<idScore> idSc = doSearch(query);
-            int counter = 1;
-            for (idScore item : idSc) {
-                out.write(pageId + " Q0 " + item.i + " " + counter + " " + item.s + " team2-standard\n");
-                counter++;
-            }
-        }
-
-        out.close();
-    }
-
-    public void customRun() throws IOException {
-        custom();
-        FileWriter fstream = new FileWriter("custom_score.run", false);
-        BufferedWriter out = new BufferedWriter(fstream);
-
-        for (Data.Page page : pages) {
-
-            // Id of the page, which is needed when you print out the run file
-            String pageId = page.getPageId();
-
-            // This query is the name of the page
-            String query = page.getPageName();
-            ArrayList<idScore> idSc = doSearch(query);
-            int counter = 1;
-            for (idScore item : idSc) {
-                out.write(pageId + " Q0 " + item.i + " " + counter + " " + item.s + " team2-standard\n");
-                counter++;
-            }
-        }
-        out.close();
-    }
 
     public ArrayList<idScore> doSearch(String query) throws IOException {
         TopDocs topDocs = query(query, 100);
-
-        ArrayList<idScore> al = new ArrayList<>();
-        // This is an example of iterating of search results
-        for (ScoreDoc sd : topDocs.scoreDocs) {
-            Document doc = searcher.doc(sd.doc);
-            String paraId = doc.get("id");
-            float score = sd.score;
-            idScore cur = new idScore(paraId, score);
-            al.add(cur);
-        }
-
-        // You should return something here after parsing out the paragraph ids and scores
-        return al;
+        return parseTopDocs(topDocs);
     }
 
     // Overloaded version that takes a Query instead
     public ArrayList<idScore> doSearch(Query q) throws IOException {
         TopDocs topDocs = searcher.search(q, 100);
+        return parseTopDocs(topDocs);
+    }
 
+    private ArrayList<idScore> parseTopDocs(TopDocs topDocs) throws IOException {
         ArrayList<idScore> al = new ArrayList<>();
         // This is an example of iterating of search results
         for (ScoreDoc sd : topDocs.scoreDocs) {
@@ -122,10 +70,9 @@ public class LuceneSearcher {
             idScore cur = new idScore(paraId, score);
             al.add(cur);
         }
-
-        // You should return something here after parsing out the paragraph ids and scores
         return al;
     }
+
 
     // Custom class for storing the retrieved data
     public class idScore {
@@ -261,10 +208,10 @@ public class LuceneSearcher {
 
     public static void main (String [] args) throws IOException {
         LuceneSearcher searcher1 = new LuceneSearcher("/home/rachel/ir/P1/paragraphs", "/home/rachel/ir/test200/test200-train/train.pages.cbor-outlines.cbor");
-        searcher1.run();
+//        searcher1.run();
 
         LuceneSearcher custom = new LuceneSearcher("/home/rachel/ir/P1/paragraphs", "/home/rachel/ir/test200/test200-train/train.pages.cbor-outlines.cbor");
-        custom.custom();
-        custom.customRun();
+//        custom.custom();
+//        custom.customRun();
     }
 }
