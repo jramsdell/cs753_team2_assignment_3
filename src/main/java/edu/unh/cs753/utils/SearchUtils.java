@@ -70,7 +70,7 @@ public class SearchUtils {
      * @param analyzer: The analyzer responsible for parsing the string.
      * @return A list of tokens (Strings)
      */
-    private static ArrayList<String> createTokenList(String queryString, Analyzer analyzer) {
+    public static ArrayList<String> createTokenList(String queryString, Analyzer analyzer) {
         final ArrayList<String> tokens = new ArrayList<>();
 
         final StringReader stringReader = new StringReader(queryString);

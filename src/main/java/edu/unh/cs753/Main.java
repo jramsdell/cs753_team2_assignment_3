@@ -29,6 +29,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
 import utils.KotlinEvaluationUtils;
+import utils.KotlinSearchUtils;
 
 public class Main {
 
@@ -45,25 +46,7 @@ public class Main {
 		}
 		else if (option.equals("search")) {
 			String cborOutlineLoc = args[2];
-			LuceneSearcher searcher = new LuceneSearcher(path, cborOutlineLoc);
-			searcher.run();
-		} else if (option.equals("custom")) {
-			String cborOutlineLoc = args[2];
-			LuceneSearcher searcher= new LuceneSearcher(path, cborOutlineLoc);
-			searcher.customRun();
-		}
-		else if (option.equals("evaluate")) {
-			String runfileLoc = args[2];
-			HashMap<String, HashMap<String, Integer>> relevant = EvaluationUtils.GetRelevantQueries(path);
-			HashMap<String, ArrayList<String>> runfileMap = EvaluationUtils.ParseResults(runfileLoc);
-			double ndcg20 = KotlinEvaluationUtils.INSTANCE.getNDCG(relevant, runfileMap);
-			double map = EvaluationUtils.getMap(relevant, runfileMap);
-			double rprec = EvaluationUtils.getPrecisionAtR(relevant, runfileMap);
-
-			System.out.println("Precision @ R: " + rprec);
-			System.out.println("MAP: " + map);
-			System.out.println("NDCG @ 20: " + ndcg20);
-
+			KotlinSearchUtils.INSTANCE.runAssignment3Search(path, cborOutlineLoc);
 		}
 
 	}

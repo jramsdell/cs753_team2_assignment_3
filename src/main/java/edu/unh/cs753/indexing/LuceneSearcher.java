@@ -105,10 +105,28 @@ public class LuceneSearcher {
         return al;
     }
 
+    // Overloaded version that takes a Query instead
+    public ArrayList<idScore> doSearch(Query q) throws IOException {
+        TopDocs topDocs = searcher.search(q, 100);
+
+        ArrayList<idScore> al = new ArrayList<>();
+        // This is an example of iterating of search results
+        for (ScoreDoc sd : topDocs.scoreDocs) {
+            Document doc = searcher.doc(sd.doc);
+            String paraId = doc.get("id");
+            float score = sd.score;
+            idScore cur = new idScore(paraId, score);
+            al.add(cur);
+        }
+
+        // You should return something here after parsing out the paragraph ids and scores
+        return al;
+    }
+
     // Custom class for storing the retrieved data
     public class idScore {
-        String i;
-        float s;
+        public String i;
+        public float s;
 
         idScore(String id, float score) {
             i = id;
@@ -160,7 +178,7 @@ public class LuceneSearcher {
             protected float score(BasicStats basicStats, float freq, float docLen) {
 
                 // Needs to be filled out
-                return 0;
+                return freq;
             }
 
             @Override
