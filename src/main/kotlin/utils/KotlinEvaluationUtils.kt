@@ -5,8 +5,11 @@ import edu.unh.cs753.utils.SearchUtils
 import org.apache.lucene.analysis.standard.StandardAnalyzer
 import org.apache.lucene.index.Term
 import org.apache.lucene.search.*
+import java.io.File
 import kotlin.math.log
 import kotlin.math.pow
+typealias queryRankings = HashMap<String, HashMap<String, Int>>
+typealias runRankings = List<Pair<String, queryRankings>>
 
 object KotlinEvaluationUtils {
     fun getNDCG(qrels: HashMap<String, HashMap<String, Int>>, runfiles: HashMap<String, ArrayList<String>>) =
@@ -120,4 +123,24 @@ object KotlinEvaluationUtils {
 //        EvaluationUtils.
 //
 //    }
+
+    public fun getRuns(resultsLoc: String) =
+        File(resultsLoc)
+            .listFiles()
+            .map { run ->
+                run.nameWithoutExtension to EvaluationUtils.parseRunFile(run) }
+
+
+    fun doSpearman(runsToCompare: runRankings, bm25Run: runRankings, queryType: String) {
+
+    }
+
+    private fun compareToBm25(bm25: queryRankings, run: queryRankings) {
+
+    }
+
+}
+
+fun main(args: Array<String>) {
+    KotlinEvaluationUtils.getRuns("/home/hcgs/Desktop/projects/assignments/cs753_team2_assignment_3/results")
 }

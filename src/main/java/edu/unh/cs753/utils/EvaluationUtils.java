@@ -11,7 +11,7 @@ public class EvaluationUtils {
     // Make a static function that takes this path as a function.
     // Open the file, split based on space, make a map of sets,
     // key = query, set = the results that are relevant to the query.
-    public static HashMap<String, HashMap<String, Integer>> GetRelevantQueries(String path) throws IOException {
+    public static HashMap<String, HashMap<String, Integer>> getRelevantQueries(String path) throws IOException {
         // Initialie hashmap
         HashMap<String, HashMap<String, Integer>> m = new HashMap<>();
 
@@ -36,8 +36,8 @@ public class EvaluationUtils {
         return m;
     }
 
-    public static HashMap<String, HashMap<String, Float>> ParseRunFile(File f) throws IOException {
-        HashMap<String, HashMap<String, Float>> m = new HashMap<>();
+    public static HashMap<String, HashMap<String, Integer>> parseRunFile(File f) throws IOException {
+        HashMap<String, HashMap<String, Integer>> m = new HashMap<>();
 
         FileReader fstream = new FileReader(f);
         BufferedReader in = new BufferedReader(fstream);
@@ -46,8 +46,8 @@ public class EvaluationUtils {
         while (line != null) {
             String[] elements = line.split(" ");
             String query = elements[0];
-            String id = elements[1];
-            Float rank = Float.parseFloat(elements[2]);
+            String id = elements[2];
+            Integer rank = Integer.parseInt(elements[3]); // Rank should be int..
 
             if (!m.containsKey(query)) {
                 m.put(query, new HashMap<>());
@@ -60,13 +60,14 @@ public class EvaluationUtils {
         return m;
     }
 
-    public static void parseAll(String dirPath) throws IOException {
-        File dir = new File(dirPath);
-        File[] dirList = dir.listFiles();
-        for (File f : dirList) {
-            ParseRunFile(f);
-        }
-    }
+    // This doesn't return anything...
+//    public static void parseAll(String dirPath) throws IOException {
+//        File dir = new File(dirPath);
+//        File[] dirList = dir.listFiles();
+//        for (File f : dirList) {
+//            ParseRunFile(f);
+//        }
+//    }
 
     // Make a map of lists to get the list of PIDs
     public static HashMap<String, ArrayList<String>> ParseResults(String path) throws IOException {
