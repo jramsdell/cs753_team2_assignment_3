@@ -49,8 +49,7 @@ public class Main {
 			KotlinSearchUtils.INSTANCE.runAssignment3Search(path, cborOutlineLoc);
 		}
         else if (option.equals("spearman")) {
-            String runDirectoryLoc = args[2];
-            KotlinEvaluationUtils.INSTANCE.getSpearmanResults(runDirectoryLoc);
+            KotlinEvaluationUtils.INSTANCE.getSpearmanResults(path);
         }
 
 	}
